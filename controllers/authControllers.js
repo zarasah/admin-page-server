@@ -1,5 +1,5 @@
 const CryptoJS = require("crypto-js");
-const { generateAccessToken } = require('../middlewares/generateAccessToken');
+const { generateAccessToken } = require('../functions/generateAccessToken');
 const { Users } = require('../models');
 
 async function register(req, res) {
@@ -35,7 +35,27 @@ async function register(req, res) {
 }
 
 function login(req, res) {
-   
+    const { email, password } = req.body;
+
+    Users.findOne({ where: { email } })
+    .then(user => {
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      const hashed_password = CryptoJS.SHA256(password).toString();
+
+      if (user.password !== hashed_password) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      const token = generateAccessToken(user.email, user.role);
+      res.json({ message: 'Login successful', jwt: token });
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    });
 }
 
 module.exports = {
