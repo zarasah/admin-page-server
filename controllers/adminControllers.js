@@ -51,8 +51,100 @@ async function getAllProducts(req, res) {
       }
 }
 
+async function createCategory(req, res) {
+    const isAdmin = checkAdmin(req, res);
+
+    if (!isAdmin) {
+        return res.send(JSON.stringify({ status: "Denied Access" }));
+    }
+
+    const { name } = req.body;
+    const category = await Categories.findOne({ where: { name } });
+    console.log('category', category)
+    if (category) {
+        return res.status(409).json({ message: 'Category already exists.' });
+    }
+
+    Categories.create({ name })
+    .then(() => res.status(201).json({ message: 'Category created' }))
+    .catch((error) => {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    })
+}
+
+async function updateCategory(req, res) {
+    const isAdmin = checkAdmin(req, res);
+
+    if (isAdmin) {
+        const { id, name } = req.body;
+
+        await Categories.update({ name }, { where: { id } });
+        res.status(200).json({ message: 'Category updated successfully' });
+    } else {
+        return res.send(JSON.stringify({ status: "Denied Access" }));
+    }
+}
+
+async function deleteCategory(req, res) {
+    const isAdmin = checkAdmin(req, res);
+
+    if (isAdmin) {
+        const { id } = req.body; //poxel params
+
+        await Categories.destroy({ where: {id}});
+        res.status(204).end(); //  OR res.status(200).json({ message: 'Category successfully deleted' });
+    } else {
+        return res.send(JSON.stringify({ status: "Denied Access" }));
+    }
+}
+
+async function createProduct(req, res) {
+    const isAdmin = checkAdmin(req, res);
+
+    if (isAdmin) {
+        const { name, price, quantity, description, img, categoryId } = req.body;
+
+        await Products.create({ name, price, quantity, description, img, categoryId });
+        res.status(201).json({ message: 'Product created' })
+    } else {
+        return res.send(JSON.stringify({ status: "Denied Access" }));
+    }
+}
+
+async function updateProdut(req, res) {
+    const isAdmin = checkAdmin(req, res);
+
+    if (isAdmin) {
+        const { name, price, quantity, description, img, categoryId, id } = req.body;
+        await Products.update({ name, price, quantity, description, img, categoryId }, { where: { id } });
+        res.status(200).json({ message: 'Product updated successfully' });
+    } else {
+        return res.send(JSON.stringify({ status: "Denied Access" }));
+    }
+}
+
+async function deleteProduct(req, res) {
+    const isAdmin = checkAdmin(req, res);
+
+    if (isAdmin) {
+        const { id } = req.body; //poxel params
+
+        await Products.destroy({ where: {id}});
+        res.status(200).json({ message: 'Product successfully deleted' });
+    } else {
+        return res.send(JSON.stringify({ status: "Denied Access" }));
+    }
+}
+
 module.exports = {
     getAllUsers,
     getAllCategories,
-    getAllProducts
+    getAllProducts,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    createProduct,
+    updateProdut,
+    deleteProduct
 }
