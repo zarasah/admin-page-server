@@ -59,18 +59,21 @@ async function createCategory(req, res) {
     }
 
     const { name } = req.body;
-    const category = await Categories.findOne({ where: { name } });
-    console.log('category', category)
-    if (category) {
-        return res.status(409).json({ message: 'Category already exists.' });
-    }
+    
+    if (name) {
+        const category = await Categories.findOne({ where: { name } });
+        console.log('category', category)
+        if (category) {
+            return res.status(409).json({ message: 'Category already exists.' });
+        }
 
-    Categories.create({ name })
-    .then(() => res.status(201).json({ message: 'Category created' }))
-    .catch((error) => {
-        console.log(error);
-        return res.status(500).json({ message: 'Internal Server Error' });
-    })
+        Categories.create({ name })
+        .then((data) => res.status(201).json({ message: 'Category created', data }))
+        .catch((error) => {
+            console.log(error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        })
+    }
 }
 
 async function updateCategory(req, res) {
@@ -90,7 +93,7 @@ async function deleteCategory(req, res) {
     const isAdmin = checkAdmin(req, res);
 
     if (isAdmin) {
-        const { id } = req.body; //poxel params
+        const { id } = req.query;
 
         await Categories.destroy({ where: {id}});
         res.status(204).end(); //  OR res.status(200).json({ message: 'Category successfully deleted' });
@@ -128,8 +131,8 @@ async function deleteProduct(req, res) {
     const isAdmin = checkAdmin(req, res);
 
     if (isAdmin) {
-        const { id } = req.body; //poxel params
-
+        const { id } = req.query;
+        
         await Products.destroy({ where: {id}});
         res.status(200).json({ message: 'Product successfully deleted' });
     } else {

@@ -50,7 +50,7 @@ function login(req, res) {
       }
 
       const token = generateAccessToken(user.email, user.role);
-      res.json({ message: 'Login successful', jwt: token });
+      res.json({ message: 'Login successful', jwt: token, role: user.role });
     })
     .catch(error => {
       console.error(error);
