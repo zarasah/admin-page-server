@@ -123,9 +123,11 @@ async function updateProdut(req, res) {
     const isAdmin = checkAdmin(req, res);
 
     if (isAdmin) {
-        const { name, price, quantity, description, img, categoryId, id } = req.body;
+        const { id } = req.query;
+        const { name, price, quantity, description, img, categoryId } = req.body;
         await Products.update({ name, price, quantity, description, img, categoryId }, { where: { id } });
-        res.status(200).json({ message: 'Product updated successfully' });
+        const data = await Products.findByPk(id);
+        res.status(200).json({ message: 'Product updated successfully', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
