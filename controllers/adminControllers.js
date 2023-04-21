@@ -80,10 +80,14 @@ async function updateCategory(req, res) {
     const isAdmin = checkAdmin(req, res);
 
     if (isAdmin) {
-        const { id, name } = req.body;
+        const { id } = req.query;
+        const { name } = req.body;
 
-        await Categories.update({ name }, { where: { id } });
-        res.status(200).json({ message: 'Category updated successfully' });
+        await Categories.update({ name }, { where: { id },  returning: ['name'] });
+
+        const data = await Categories.findByPk(id);
+
+        res.status(200).json({ message: 'Category updated successfully', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
@@ -108,8 +112,8 @@ async function createProduct(req, res) {
     if (isAdmin) {
         const { name, price, quantity, description, img, categoryId } = req.body;
 
-        await Products.create({ name, price, quantity, description, img, categoryId });
-        res.status(201).json({ message: 'Product created' })
+        const data = await Products.create({ name, price, quantity, description, img, categoryId });
+        res.status(201).json({ message: 'Product created', data })
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
