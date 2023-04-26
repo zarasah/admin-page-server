@@ -62,7 +62,7 @@ async function createCategory(req, res) {
     
     if (name) {
         const category = await Categories.findOne({ where: { name } });
-        console.log('category', category)
+        
         if (category) {
             return res.status(409).json({ message: 'Category already exists.' });
         }
@@ -73,6 +73,8 @@ async function createCategory(req, res) {
             console.log(error);
             return res.status(500).json({ message: 'Internal Server Error' });
         })
+    } else {
+        return res.status(400);
     }
 }
 
@@ -83,11 +85,21 @@ async function updateCategory(req, res) {
         const { id } = req.query;
         const { name } = req.body;
 
+        if (!name) {
+            return res.status(400).json({ message: 'Category name is required.' });
+        }
+
+        const category = await Categories.findOne({ where: { name } });
+
+        if (category) {
+            return res.status(409).json({ message: 'Category already exists.' });
+        }
+
         await Categories.update({ name }, { where: { id },  returning: ['name'] });
 
         const data = await Categories.findByPk(id);
 
-        res.status(200).json({ message: 'Category updated successfully', data });
+        return res.status(200).json({ message: 'Category updated successfully', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
