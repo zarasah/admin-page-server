@@ -70,11 +70,10 @@ async function createCategory(req, res) {
         Categories.create({ name })
         .then((data) => res.status(201).json({ message: 'Category created', data }))
         .catch((error) => {
-            console.log(error);
             return res.status(500).json({ message: 'Internal Server Error' });
         })
     } else {
-        return res.status(400);
+        return res.status(400).json({ message: 'Category name is required.' });
     }
 }
 
@@ -124,8 +123,13 @@ async function createProduct(req, res) {
     if (isAdmin) {
         const { name, price, quantity, description, img, categoryId } = req.body;
 
+        if (!(name && price && quantity && description && img && categoryId)) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
+
         const data = await Products.create({ name, price, quantity, description, img, categoryId });
-        res.status(201).json({ message: 'Product created', data })
+
+        return res.status(201).json({ message: 'Product created', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
@@ -137,9 +141,14 @@ async function updateProdut(req, res) {
     if (isAdmin) {
         const { id } = req.query;
         const { name, price, quantity, description, img, categoryId } = req.body;
+
+        if (!(name && price && quantity && description && img && categoryId)) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
+
         await Products.update({ name, price, quantity, description, img, categoryId }, { where: { id } });
         const data = await Products.findByPk(id);
-        res.status(200).json({ message: 'Product updated successfully', data });
+        return res.status(200).json({ message: 'Product updated successfully', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
