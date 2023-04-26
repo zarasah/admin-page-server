@@ -164,7 +164,20 @@ async function deleteProduct(req, res) {
         const { id } = req.query;
         
         await Products.destroy({ where: {id}});
-        res.status(200).json({ message: 'Product successfully deleted' });
+        return res.status(200).json({ message: 'Product successfully deleted' });
+    } else {
+        return res.send(JSON.stringify({ status: "Denied Access" }));
+    }
+}
+
+async function deleteUser(req, res) {
+    const isAdmin = checkAdmin(req, res);
+
+    if (isAdmin) {
+        const { id } = req.query;
+        
+        await Users.destroy({ where: {id}});
+        return res.status(200).json({ message: 'Product successfully deleted' });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
@@ -179,5 +192,6 @@ module.exports = {
     deleteCategory,
     createProduct,
     updateProdut,
-    deleteProduct
+    deleteProduct,
+    deleteUser
 }

@@ -15,4 +15,6 @@ adminRt.post('/createcategory', authenticateToken, adminCtrl.createCategory);
 adminRt.put('/updatecategory', authenticateToken, adminCtrl.updateCategory);
 adminRt.delete('/deletecategory', authenticateToken, adminCtrl.deleteCategory);
 
+adminRt.delete('/deleteuser', authenticateToken, adminCtrl.deleteUser);
+
 module.exports = adminRt;

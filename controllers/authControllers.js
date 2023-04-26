@@ -3,7 +3,7 @@ const { generateAccessToken } = require('../functions/generateAccessToken');
 const { Users } = require('../models');
 
 async function register(req, res) {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
     
     if (!email || !password) {
         res.status(400).json({ message: 'Email and password fields are required.' });
@@ -24,6 +24,7 @@ async function register(req, res) {
         const hashed_password = CryptoJS.SHA256(password).toString();
 
         await Users.create({
+            name,
             email,
             password: hashed_password
         })
