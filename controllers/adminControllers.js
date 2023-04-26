@@ -11,7 +11,8 @@ async function getAllUsers(req, res) {
     try {
         const users = await Users.findAll({
             attributes: { exclude: ['password'] } 
-        }); 
+        });
+        
         res.status(200).json(users);
       } catch (err) {
         console.error(err);
@@ -110,7 +111,9 @@ async function deleteCategory(req, res) {
     if (isAdmin) {
         const { id } = req.query;
 
+        await Products.destroy({ where: {categoryId: id}});
         await Categories.destroy({ where: {id}});
+        
         res.status(204).end(); //  OR res.status(200).json({ message: 'Category successfully deleted' });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
