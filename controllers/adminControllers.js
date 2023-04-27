@@ -43,13 +43,26 @@ async function getAllProducts(req, res) {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
 
-    try {
-        const products = await Products.findAll(); 
+    Products.findAll({
+        include: {
+          model: Categories,
+          attributes: ['name'], // specify the attributes you want to include from the Category table
+        },
+        attributes: ['id', 'name', 'price', 'quantity', 'description', 'img', 'categoryId', 'name']
+      }).then((products) => {
         res.status(200).json(products);
-      } catch (err) {
-        console.error(err);
+      }).catch((error) => {
+        console.error(error);
         res.status(500).send('Server Error');
-      }
+      });
+
+    // try {
+    //     const products = await Products.findAll(); 
+    //     res.status(200).json(products);
+    //   } catch (err) {
+    //     console.error(err);
+    //     res.status(500).send('Server Error');
+    //   }
 }
 
 async function createCategory(req, res) {
@@ -148,10 +161,24 @@ async function updateProdut(req, res) {
         if (!(name && price && quantity && description && img && categoryId)) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
-
+       
         await Products.update({ name, price, quantity, description, img, categoryId }, { where: { id } });
-        const data = await Products.findByPk(id);
-        return res.status(200).json({ message: 'Product updated successfully', data });
+        // const data = await Products.findByPk(id);
+        Products.findOne({
+            where: { id },
+            attributes: ['id', 'name', 'price', 'quantity', 'description', 'img', 'categoryId', 'name'],
+            include: {
+              model: Categories,
+              attributes: ['name'],
+            },
+        })
+        .then(product => {
+            return res.status(200).json({ message: 'Product updated successfully', product });
+        })
+        .catch(error => {
+            console.log(error)
+        })
+        // return res.status(200).json({ message: 'Product updated successfully', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }
