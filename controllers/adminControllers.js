@@ -136,7 +136,7 @@ async function createProduct(req, res) {
     if (isAdmin) {
         const { name, price, quantity, description, categoryId } = req.body;
         const img = req.file.filename;
-       
+
         if (!(name && price && quantity && description && img && categoryId)) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
@@ -144,6 +144,7 @@ async function createProduct(req, res) {
         const data = await Products.create({ name, price, quantity, description, img, categoryId });
         const imgUrl = `${req.protocol}://${req.hostname}:${process.env.PORT}/uploads/${data.img}`;
         data.img = imgUrl;
+
         return res.status(201).json({ message: 'Product created', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
@@ -156,13 +157,17 @@ async function updateProdut(req, res) {
     if (isAdmin) {
         const { id } = req.query;
         const { name, price, quantity, description, categoryId } = req.body;
-        const img = req.file.filename;
+        const img = req.file?.filename || 1;
         
         if (!(name && price && quantity && description && img && categoryId)) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
-       
-        await Products.update({ name, price, quantity, description, img, categoryId }, { where: { id } });
+
+        if (img === 1) {
+            await Products.update({ name, price, quantity, description, categoryId }, { where: { id } });
+        } else {
+           await Products.update({ name, price, quantity, description, img, categoryId }, { where: { id } }); 
+        }
 
         Products.findOne({
             where: { id },
