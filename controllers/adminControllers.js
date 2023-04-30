@@ -49,7 +49,12 @@ async function getAllProducts(req, res) {
           attributes: ['name'], // specify the attributes you want to include from the Category table
         },
         attributes: ['id', 'name', 'price', 'quantity', 'description', 'img', 'categoryId', 'name']
-      }).then((products) => {
+      }).then((data) => {
+        const products = data.map((item) => {
+            const imgUrl = `${req.protocol}://${req.hostname}:${process.env.PORT}/uploads/${item.img}`;
+            item.img = imgUrl;
+            return item;
+        })
         res.status(200).json(products);
       }).catch((error) => {
         console.error(error);
