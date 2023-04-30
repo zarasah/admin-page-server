@@ -46,7 +46,7 @@ async function getAllProducts(req, res) {
     Products.findAll({
         include: {
           model: Categories,
-          attributes: ['name'], // specify the attributes you want to include from the Category table
+          attributes: ['name'],
         },
         attributes: ['id', 'name', 'price', 'quantity', 'description', 'img', 'categoryId', 'name']
       }).then((data) => {
@@ -60,14 +60,6 @@ async function getAllProducts(req, res) {
         console.error(error);
         res.status(500).send('Server Error');
       });
-
-    // try {
-    //     const products = await Products.findAll(); 
-    //     res.status(200).json(products);
-    //   } catch (err) {
-    //     console.error(err);
-    //     res.status(500).send('Server Error');
-    //   }
 }
 
 async function createCategory(req, res) {
@@ -116,7 +108,7 @@ async function updateCategory(req, res) {
         await Categories.update({ name }, { where: { id },  returning: ['name'] });
 
         const data = await Categories.findByPk(id);
-
+        
         return res.status(200).json({ message: 'Category updated successfully', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
@@ -150,7 +142,8 @@ async function createProduct(req, res) {
         }
 
         const data = await Products.create({ name, price, quantity, description, img, categoryId });
-
+        const imgUrl = `${req.protocol}://${req.hostname}:${process.env.PORT}/uploads/${data.img}`;
+        data.img = imgUrl;
         return res.status(201).json({ message: 'Product created', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
@@ -162,14 +155,15 @@ async function updateProdut(req, res) {
 
     if (isAdmin) {
         const { id } = req.query;
-        const { name, price, quantity, description, img, categoryId } = req.body;
-
+        const { name, price, quantity, description, categoryId } = req.body;
+        const img = req.file.filename;
+        
         if (!(name && price && quantity && description && img && categoryId)) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
        
         await Products.update({ name, price, quantity, description, img, categoryId }, { where: { id } });
-        // const data = await Products.findByPk(id);
+
         Products.findOne({
             where: { id },
             attributes: ['id', 'name', 'price', 'quantity', 'description', 'img', 'categoryId', 'name'],
@@ -179,12 +173,13 @@ async function updateProdut(req, res) {
             },
         })
         .then(product => {
+            const imgUrl = `${req.protocol}://${req.hostname}:${process.env.PORT}/uploads/${product.img}`;
+            product.img = imgUrl;
             return res.status(200).json({ message: 'Product updated successfully', product });
         })
         .catch(error => {
             console.log(error)
         })
-        // return res.status(200).json({ message: 'Product updated successfully', data });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
     }

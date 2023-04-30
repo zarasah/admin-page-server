@@ -9,7 +9,7 @@ adminRt.get('/categories', authenticateToken, adminCtrl.getAllCategories);
 adminRt.get('/products', authenticateToken, adminCtrl.getAllProducts);
 
 adminRt.post('/createproduct', authenticateToken, upload.single('img'), adminCtrl.createProduct);
-adminRt.put('/updateproduct', authenticateToken, adminCtrl.updateProdut);
+adminRt.put('/updateproduct', authenticateToken, upload.single('img'), adminCtrl.updateProdut);
 adminRt.delete('/deleteproduct', authenticateToken, adminCtrl.deleteProduct);
 
 adminRt.post('/createcategory', authenticateToken, adminCtrl.createCategory);
