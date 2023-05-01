@@ -1,5 +1,6 @@
 const { Users, Products, Categories } = require('../models');
 const { checkAdmin } = require('../functions/checkAdmin');
+const fs = require('fs')
 
 async function getAllUsers(req, res) {
     const isAdmin = checkAdmin(req, res);
@@ -12,7 +13,6 @@ async function getAllUsers(req, res) {
         const users = await Users.findAll({
             attributes: { exclude: ['password'] } 
         });
-        
         res.status(200).json(users);
       } catch (err) {
         console.error(err);
@@ -121,6 +121,19 @@ async function deleteCategory(req, res) {
     if (isAdmin) {
         const { id } = req.query;
 
+        const data = await Products.findAll({ where: {categoryId: id}});
+        data.forEach(item => {
+            const filePath = './uploads/' + item.img;
+
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                console.error(err);
+                return;
+                }
+                console.log('File has been deleted');
+            });
+        });
+
         await Products.destroy({ where: {categoryId: id}});
         await Categories.destroy({ where: {id}});
         
@@ -196,7 +209,19 @@ async function deleteProduct(req, res) {
     if (isAdmin) {
         const { id } = req.query;
         
+        const data = await Products.findOne({where: { id }})
+        const filePath = './uploads/' + data.img;
+
+        fs.unlink(filePath, (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            console.log('File has been deleted');
+          });
+        
         await Products.destroy({ where: {id}});
+        
         return res.status(200).json({ message: 'Product successfully deleted' });
     } else {
         return res.send(JSON.stringify({ status: "Denied Access" }));
