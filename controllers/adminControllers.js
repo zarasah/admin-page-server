@@ -148,12 +148,11 @@ async function createProduct(req, res) {
 
     if (isAdmin) {
         const { name, price, quantity, description, categoryId } = req.body;
-        const img = req.file.filename;
 
         if (!(name && price && quantity && description && img && categoryId)) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
-
+        const img = req.file.filename;
         const data = await Products.create({ name, price, quantity, description, img, categoryId });
         const imgUrl = `${req.protocol}://${req.hostname}:${process.env.PORT}/uploads/${data.img}`;
         data.img = imgUrl;
